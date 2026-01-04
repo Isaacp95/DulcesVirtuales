@@ -36,7 +36,9 @@ import com.progmovil.dulcesvirtuales.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel,
-    onLoginSuccess: () -> Unit) {
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -117,19 +119,10 @@ fun LoginScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        Button(
-            onClick = {
-                authViewModel.registerWithEmail(email, password) { success, error ->
-                    if (success) {
-                        onLoginSuccess()
-                    } else {
-                        Toast.makeText(context, error ?: "Error desconocido", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+        androidx.compose.material3.TextButton(
+            onClick = onNavigateToRegister
         ) {
-            Text("Registrar")
+            Text("¿No tienes cuenta? Regístrate aquí")
         }
 
         Spacer(Modifier.height(24.dp))

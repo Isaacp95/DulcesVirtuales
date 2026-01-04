@@ -61,6 +61,7 @@ fun MainScreen(
         }
     }
 }
+//CATALOGO
 @Composable
 fun ProductItem(product: Product, onClick: () -> Unit) {
     Column(

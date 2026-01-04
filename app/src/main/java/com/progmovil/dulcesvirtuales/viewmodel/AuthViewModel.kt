@@ -9,28 +9,34 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.progmovil.dulcesvirtuales.R
+import com.progmovil.dulcesvirtuales.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class AuthViewModel: ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    private val _currentUser = MutableStateFlow(auth.currentUser)
-    val currentUser: StateFlow< FirebaseUser? > = _currentUser
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User? > = _currentUser
 
     init {
-        auth.addAuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            _currentUser.value = user
-            Log.d("AUTH", "Auth state changed: ${user?.email ?: "No user"}")
+        checkCurrentUser()
+    }
+    private fun checkCurrentUser() {
+        val firebaseUser = auth.currentUser
+        _currentUser.value = firebaseUser?.let {
+            User(
+                uid = it.uid,
+                email = it.email ?: "",
+                displayName = it.displayName ?: "Usuario"
+            )
         }
     }
-
     fun loginWithEmail(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _currentUser.value = auth.currentUser
+                    checkCurrentUser()
                     onResult(true, null)
                 } else {
                     onResult(false, task.exception?.message)
@@ -42,7 +48,7 @@ class AuthViewModel: ViewModel() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _currentUser.value = auth.currentUser
+                    checkCurrentUser()
                     onResult(true, null)
                 } else {
                     onResult(false, task.exception?.message)
@@ -55,7 +61,7 @@ class AuthViewModel: ViewModel() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _currentUser.value = auth.currentUser
+                    checkCurrentUser()
                     onResult(true, null)
                 } else {
                     onResult(false, task.exception?.message)
