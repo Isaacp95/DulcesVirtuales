@@ -12,6 +12,12 @@ import coil.compose.rememberAsyncImagePainter
 import com.progmovil.dulcesvirtuales.model.Product
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.painterResource
+import com.progmovil.dulcesvirtuales.R
 import com.progmovil.dulcesvirtuales.viewmodel.InventoryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,6 +27,7 @@ fun ProductDetailScreen(
     viewModel: InventoryViewModel,
     onBack: () -> Unit
 ) {
+    var quantityToSell by remember { mutableIntStateOf(1)}
     Scaffold(
         topBar = {
             TopAppBar(
@@ -54,7 +61,7 @@ fun ProductDetailScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // Botón de eliminar
+            /* Botón de eliminar
             Button(
                 onClick = {
                     viewModel.deleteProduct(product.id)
@@ -63,6 +70,26 @@ fun ProductDetailScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text("Eliminar producto", color = MaterialTheme.colorScheme.onError)
+            }*/
+
+            // Fragmento de la UI en ProductDetailScreen
+            Text(text = "Cantidad a agregar:  $quantityToSell")
+
+            Row {
+                IconButton(onClick = { if (quantityToSell > 1) quantityToSell-- }) {
+                    Icon(painterResource(id = R.drawable.minus_circle), "Menos")
+                }
+                IconButton(onClick = { if (quantityToSell < product.stock) quantityToSell++ }) {
+                    Icon(painterResource(id = R.drawable.plus_circle), "Más")
+                }
+            }
+
+            Button(
+                onClick = { viewModel.addToCart(product, quantityToSell) },
+                enabled = product.stock > 0,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Agregar a la bolsa")
             }
 
             // Botón adicional para regresar (opcional si ya tienes el ícono arriba)

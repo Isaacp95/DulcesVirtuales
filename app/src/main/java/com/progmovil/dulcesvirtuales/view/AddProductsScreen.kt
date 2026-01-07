@@ -9,12 +9,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.progmovil.dulcesvirtuales.viewmodel.InventoryViewModel
@@ -23,13 +25,15 @@ import java.io.FileOutputStream
 
 @Composable
 fun AddProductScreen(
-
     viewModel: InventoryViewModel,
     onProductAdded: () -> Unit
-) {
+)
+{
     var productId by remember { mutableStateOf("") }
     var productName by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var productPrice by remember { mutableStateOf("") }
+    var productStock by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
@@ -44,18 +48,35 @@ fun AddProductScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        //ID
         OutlinedTextField(
             value = productId,
             onValueChange = { productId = it },
             label = { Text("ID del producto") },
             modifier = Modifier.fillMaxWidth()
         )
-
+        //Nombre
         OutlinedTextField(
             value = productName,
             onValueChange = { productName = it },
             label = { Text("Nombre del producto") },
             modifier = Modifier.fillMaxWidth()
+        )
+        //Precio
+        OutlinedTextField(
+            value = productPrice,
+            onValueChange = { productPrice = it },
+            label = { Text("Precio ($)") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+        )
+        // Campo para Stock
+        OutlinedTextField(
+            value = productStock,
+            onValueChange = { productStock = it },
+            label = { Text("Cantidad en existencia") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         Box(
@@ -89,7 +110,9 @@ fun AddProductScreen(
                         viewModel.saveProductToFirestore(
                             id = productId,
                             name = productName,
-                            imageUri = localPath // Guardamos la ruta interna
+                            imageUri = localPath, // Guardamos la ruta interna
+                            price = productPrice.toDoubleOrNull() ?: 0.00,
+                            stock = productStock.toIntOrNull() ?: 0
                         )
                         Toast.makeText(context, "Producto guardado", Toast.LENGTH_SHORT).show()
                         onProductAdded()
